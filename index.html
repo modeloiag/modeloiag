@@ -52,7 +52,8 @@
                 </p>
             </div>
             
-            <div id="auth-error" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg hidden"></div>
+            <!--div id="auth-error" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg hidden"></div>-->
+            <div id="auth-error" class="mt-4 p-4 bg-red-500 text-white rounded-lg font-semibold hidden shadow-lg"></div>
         </div>
     </div>
 
@@ -216,12 +217,17 @@
         // =====================================================
         // FUNCIONES DE AUTENTICACIÓN
         // =====================================================
-        function mostrarError(msg) {
-            const div = document.getElementById('auth-error');
-            div.textContent = msg;
-            div.classList.remove('hidden');
-            setTimeout(() => div.classList.add('hidden'), 5000);
-        }
+function mostrarError(msg) {
+    const div = document.getElementById('auth-error');
+    div.textContent = msg;
+    div.classList.remove('hidden');
+    
+    // Hacer scroll hacia el error para que sea visible
+    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Ocultar después de 6 segundos
+    setTimeout(() => div.classList.add('hidden'), 6000);
+}
 
         function mostrarRegistro() {
             document.getElementById('formulario-login').classList.add('hidden');
@@ -251,8 +257,17 @@
                 usuarioActual = { uid: cred.user.uid, nombre: nombre, email: email };
                 iniciarCuestionarioVARK();
             } catch (e) {
-                mostrarError(e.message);
-            }
+    let mensajeError = "Error al registrar: ";
+    if (e.code === 'auth/email-already-in-use') {
+        mensajeError = "Este correo ya está registrado. Intenta iniciar sesión.";
+    } else if (e.code === 'auth/weak-password') {
+        mensajeError = "La contraseña es muy débil. Usa al menos 6 caracteres.";
+    } else if (e.code === 'auth/invalid-email') {
+        mensajeError = "El correo electrónico no es válido.";
+    } else {
+        mensajeError = e.message;
+    }
+    mostrarError(mensajeError);
         }
 
         async function iniciarSesion() {
@@ -273,8 +288,19 @@
                     iniciarCuestionarioVARK();
                 }
             } catch (e) {
-                mostrarError("Error: " + e.message);
-            }
+    let mensajeError = "Error al iniciar sesión: ";
+    if (e.code === 'auth/user-not-found') {
+        mensajeError = "No existe una cuenta con este correo.";
+    } else if (e.code === 'auth/wrong-password') {
+        mensajeError = "La contraseña es incorrecta.";
+    } else if (e.code === 'auth/invalid-email') {
+        mensajeError = "El correo electrónico no es válido.";
+    } else if (e.code === 'auth/too-many-requests') {
+        mensajeError = "Demasiados intentos. Intenta más tarde.";
+    } else {
+        mensajeError = e.message;
+    }
+    mostrarError(mensajeError);
         }
 
         // =====================================================
