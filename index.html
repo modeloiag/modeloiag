@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Recomendación Educativa con IA Generativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none !important; }
+        .loading { opacity: 0.6; pointer-events: none; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <!-- ==================== PANTALLA LOGIN/REGISTRO ==================== -->
+    <div id="pantalla-auth" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center text-indigo-700 mb-2">🎓 Modelo de IAG</h1>
+            <p class="text-center text-gray-500 mb-6">Recomendación de contenidos educativos </p>
+            
+            <div id="formulario-login">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Iniciar Sesión</h2>
+                <input type="email" id="login-email" placeholder="Correo electrónico" 
+                    class="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-400">
+                <input type="password" id="login-password" placeholder="Contraseña" 
+                    class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-400">
+                <button onclick="iniciarSesion()" 
+                    class="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 font-semibold">
+                    Entrar
+                </button>
+                <p class="text-center mt-4 text-gray-600">
+                    ¿No tienes cuenta? 
+                    <a onclick="mostrarRegistro()" class="text-indigo-600 cursor-pointer font-semibold">Regístrate</a>
+                </p>
+            </div>
+
+            <div id="formulario-registro" class="hidden">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Crear Cuenta</h2>
+                <input type="text" id="reg-nombre" placeholder="Nombre completo" 
+                    class="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-400">
+                <input type="email" id="reg-email" placeholder="Correo electrónico" 
+                    class="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-400">
+                <input type="password" id="reg-password" placeholder="Contraseña (mín. 6 caracteres)" 
+                    class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-400">
+                <button onclick="registrarUsuario()" 
+                    class="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 font-semibold">
+                    Registrarme
+                </button>
+                <p class="text-center mt-4 text-gray-600">
+                    ¿Ya tienes cuenta? 
+                    <a onclick="mostrarLogin()" class="text-indigo-600 cursor-pointer font-semibold">Inicia sesión</a>
+                </p>
+            </div>
+            
+            <div id="auth-error" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg hidden"></div>
+        </div>
+    </div>
+
+    <!-- ==================== PANTALLA CUESTIONARIO VARK ==================== -->
+    <div id="pantalla-vark" class="hidden min-h-screen p-4 max-w-3xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mt-8">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-2">📊 Cuestionario de Estilos de Aprendizaje (VARK)</h2>
+            <p class="text-gray-600 mb-6">Responde según tu preferencia. No hay respuestas incorrectas.</p>
+            
+            <div id="preguntas-vark" class="space-y-6"></div>
+            
+            <button onclick="calcularVARK()" 
+                class="mt-6 w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 font-semibold">
+                Calcular mi estilo de aprendizaje
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== PANTALLA RESULTADO VARK ==================== -->
+    <div id="pantalla-resultado" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+            <div class="text-6xl mb-4">🎯</div>
+            <h2 class="text-2xl font-bold text-indigo-700 mb-2">Tu estilo de aprendizaje es:</h2>
+            <div id="resultado-vark" class="text-4xl font-bold text-green-600 my-6"></div>
+            <p id="descripcion-vark" class="text-gray-600 mb-6"></p>
+            <button onclick="irASeleccion()" 
+                class="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 font-semibold">
+                Continuar →
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== PANTALLA SELECCIÓN CURSO/TEMA ==================== -->
+    <div id="pantalla-seleccion" class="hidden min-h-screen p-4 max-w-3xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mt-8">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">📚 Selecciona un curso y tema</h2>
+            
+            <label class="block text-gray-700 font-semibold mb-2">Curso:</label>
+            <select id="select-curso" onchange="cargarTemas()" 
+                class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-400">
+                <option value="">-- Selecciona un curso --</option>
+                <option value="programacion">Programación I</option>
+                <option value="bd">Base de Datos</option>
+                <option value="redes">Redes de Computadoras</option>
+                <option value="ia">Inteligencia Artificial</option>
+            </select>
+            
+            <label class="block text-gray-700 font-semibold mb-2">Tema:</label>
+            <select id="select-tema" 
+                class="w-full p-3 border rounded-lg mb-6 focus:ring-2 focus:ring-indigo-400">
+                <option value="">-- Primero selecciona un curso --</option>
+            </select>
+            
+            <button onclick="generarRecomendacion()" id="btn-generar"
+                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 font-semibold text-lg">
+                 Generar recomendación con IA
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== PANTALLA RECOMENDACIÓN ==================== -->
+    <div id="pantalla-recomendacion" class="hidden min-h-screen p-4 max-w-4xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-indigo-700"> Recomendación Personalizada</h2>
+                <span id="badge-estilo" class="px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold"></span>
+            </div>
+            
+            <div id="contenido-ia" class="prose max-w-none p-6 bg-gray-50 rounded-lg min-h-[200px]">
+                <div class="text-center text-gray-500 py-12">
+                    <div class="animate-spin text-4xl mb-4">⚙️</div>
+                    <p>La IA está generando tu contenido personalizado...</p>
+                </div>
+            </div>
+            
+            <div id="seccion-calificar" class="hidden mt-6 p-6 bg-yellow-50 rounded-lg">
+                <h3 class="font-semibold text-gray-700 mb-3">¿Qué tan útil fue esta recomendación?</h3>
+                <div class="flex gap-2 mb-4">
+                    <button onclick="calificar(1)" class="text-3xl hover:scale-125 transition">⭐</button>
+                    <button onclick="calificar(2)" class="text-3xl hover:scale-125 transition">⭐</button>
+                    <button onclick="calificar(3)" class="text-3xl hover:scale-125 transition">⭐</button>
+                    <button onclick="calificar(4)" class="text-3xl hover:scale-125 transition">⭐</button>
+                    <button onclick="calificar(5)" class="text-3xl hover:scale-125 transition">⭐</button>
+                </div>
+                <textarea id="comentario" placeholder="Comentario opcional..." 
+                    class="w-full p-3 border rounded-lg mb-3"></textarea>
+                <button onclick="guardarEvaluacion()" 
+                    class="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 font-semibold">
+                    Guardar evaluación
+                </button>
+            </div>
+            
+            <button onclick="volverSeleccion()" 
+                class="mt-4 w-full bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-semibold">
+                ← Probar otro tema
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== FIREBASE SDK ==================== -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // =====================================================
+        // 🔑 CONFIGURACIÓN - REEMPLAZA ESTOS VALORES
+        // =====================================================
+        
+        // 1. Pega aquí tu firebaseConfig (el que copiaste de Firebase)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhFzQnqEuhMVZLJIsBSNjJ-pNoeOHimGs",
+            authDomain: "modeloiaig.firebaseapp.com",
+            projectId: "modeloiaig",
+            storageBucket: "modeloiaig.appspot.com",
+            messagingSenderId: "695808252428",
+            appId: "1:695808252428:web:d1e4d6386640a6f197ac29"
+        };
+
+        // 2. Pega aquí tu API Key de Google Gemini (de Google AI Studio)
+        const GEMINI_API_KEY = "PEGA_AQUI_TU_API_KEY_DE_GEMINI";
+
+        // =====================================================
+        // INICIALIZACIÓN DE FIREBASE
+        // =====================================================
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let usuarioActual = null;
+        let estiloVARK = null;
+        let temaActual = "";
+        let cursoActual = "";
+        let contenidoGenerado = "";
+
+        // =====================================================
+        // DATOS DE LA APLICACIÓN
+        // =====================================================
+        const temasPorCurso = {
+            programacion: ["Variables y tipos de datos", "Estructuras condicionales", "Ciclos y bucles", "Funciones", "Arreglos"],
+            bd: ["Modelo Entidad-Relación", "Normalización", "SQL básico", "Índices", "Transacciones"],
+            redes: ["Modelo OSI", "Protocolo TCP/IP", "Direccionamiento IP", "DNS y DHCP", "Seguridad de redes"],
+            ia: ["Búsqueda heurística", "Redes neuronales", "Aprendizaje supervisado", "Procesamiento de lenguaje natural", "Visión por computadora"]
+        };
+
+        const preguntasVARK = [
+            { p: "Si necesito aprender algo nuevo, prefiero:", opciones: { V: "Ver diagramas o gráficos", A: "Escuchar una explicación", L: "Leer instrucciones escritas", K: "Hacerlo yo mismo" }},
+            { p: "Cuando doy direcciones, suelo:", opciones: { V: "Dibujar un mapa", A: "Explicar verbalmente", L: "Escribir las instrucciones", K: "Acompañar a la persona" }},
+            { p: "Prefiero un profesor que:", opciones: { V: "Use presentaciones visuales", A: "Explique hablando", L: "Entregue documentos", K: "Haga demostraciones prácticas" }},
+            { p: "Para recordar algo, me ayuda más:", opciones: { V: "Ver una imagen mental", A: "Escuchar mi voz interior", L: "Leer mis notas", K: "Recordar la experiencia física" }},
+            { p: "Cuando estoy aburrido, prefiero:", opciones: { V: "Ver fotos o videos", A: "Escuchar música", L: "Leer algo interesante", K: "Salir a caminar o hacer algo" }}
+        ];
+
+        const descripcionesVARK = {
+            V: "VISUAL - Aprendes mejor con imágenes, diagramas, mapas conceptuales y representaciones gráficas.",
+            A: "AUDITIVO - Aprendes mejor escuchando explicaciones, podcasts, debates y discusiones.",
+            L: "LECTURA/ESCRITURA - Aprendes mejor leyendo textos, tomando notas y escribiendo resúmenes.",
+            K: "KINESTÉSICO - Aprendes mejor haciendo, practicando, experimentando y con actividades físicas."
+        };
+
+        // =====================================================
+        // FUNCIONES DE AUTENTICACIÓN
+        // =====================================================
+        function mostrarError(msg) {
+            const div = document.getElementById('auth-error');
+            div.textContent = msg;
+            div.classList.remove('hidden');
+            setTimeout(() => div.classList.add('hidden'), 5000);
+        }
+
+        function mostrarRegistro() {
+            document.getElementById('formulario-login').classList.add('hidden');
+            document.getElementById('formulario-registro').classList.remove('hidden');
+        }
+
+        function mostrarLogin() {
+            document.getElementById('formulario-registro').classList.add('hidden');
+            document.getElementById('formulario-login').classList.remove('hidden');
+        }
+
+        async function registrarUsuario() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            
+            if (!nombre || !email || !password) return mostrarError("Completa todos los campos");
+            if (password.length < 6) return mostrarError("La contraseña debe tener al menos 6 caracteres");
+            
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                await db.collection('usuarios').doc(cred.user.uid).set({
+                    nombre: nombre,
+                    email: email,
+                    fechaRegistro: new Date().toISOString()
+                });
+                usuarioActual = { uid: cred.user.uid, nombre: nombre, email: email };
+                iniciarCuestionarioVARK();
+            } catch (e) {
+                mostrarError(e.message);
+            }
+        }
+
+        async function iniciarSesion() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const cred = await auth.signInWithEmailAndPassword(email, password);
+                const doc = await db.collection('usuarios').doc(cred.user.uid).get();
+                usuarioActual = { uid: cred.user.uid, ...doc.data() };
+                
+                // Verificar si ya hizo el test VARK
+                const varkDoc = await db.collection('resultados_vark').doc(cred.user.uid).get();
+                if (varkDoc.exists) {
+                    estiloVARK = varkDoc.data().estilo;
+                    mostrarPantalla('pantalla-seleccion');
+                } else {
+                    iniciarCuestionarioVARK();
+                }
+            } catch (e) {
+                mostrarError("Error: " + e.message);
+            }
+        }
+
+        // =====================================================
+        // CUESTIONARIO VARK
+        // =====================================================
+        function iniciarCuestionarioVARK() {
+            mostrarPantalla('pantalla-vark');
+            const cont = document.getElementById('preguntas-vark');
+            cont.innerHTML = '';
+            
+            preguntasVARK.forEach((preg, i) => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-gray-50 rounded-lg';
+                div.innerHTML = `
+                    <p class="font-semibold mb-3">${i+1}. ${preg.p}</p>
+                    <div class="space-y-2">
+                        ${Object.entries(preg.opciones).map(([key, val]) => `
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="p${i}" value="${key}" class="w-4 h-4 text-indigo-600">
+                                <span>${val}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                cont.appendChild(div);
+            });
+        }
+
+        function calcularVARK() {
+            const puntajes = { V: 0, A: 0, L: 0, K: 0 };
+            
+            for (let i = 0; i < preguntasVARK.length; i++) {
+                const sel = document.querySelector(`input[name="p${i}"]:checked`);
+                if (!sel) return alert("Responde todas las preguntas");
+                puntajes[sel.value]++;
+            }
+            
+            const max = Object.entries(puntajes).sort((a,b) => b[1]-a[1])[0];
+            estiloVARK = max[0];
+            
+            // Guardar en Firestore
+            db.collection('resultados_vark').doc(usuarioActual.uid).set({
+                nombre: usuarioActual.nombre,
+                email: usuarioActual.email,
+                estilo: estiloVARK,
+                puntajes: puntajes,
+                fecha: new Date().toISOString()
+            });
+            
+            document.getElementById('resultado-vark').textContent = estiloVARK === 'V' ? 'Visual' : 
+                estiloVARK === 'A' ? 'Auditivo' : estiloVARK === 'L' ? 'Lectura/Escritura' : 'Kinestésico';
+            document.getElementById('descripcion-vark').textContent = descripcionesVARK[estiloVARK];
+            mostrarPantalla('pantalla-resultado');
+        }
+
+        // =====================================================
+        // SELECCIÓN DE CURSO Y TEMA
+        // =====================================================
+        function cargarTemas() {
+            const curso = document.getElementById('select-curso').value;
+            const selTema = document.getElementById('select-tema');
+            selTema.innerHTML = '<option value="">-- Selecciona un tema --</option>';
+            
+            if (curso && temasPorCurso[curso]) {
+                temasPorCurso[curso].forEach(t => {
+                    selTema.innerHTML += `<option value="${t}">${t}</option>`;
+                });
+            }
+        }
+
+        // =====================================================
+        // GENERACIÓN CON GEMINI
+        // =====================================================
+        async function generarRecomendacion() {
+            cursoActual = document.getElementById('select-curso').value;
+            temaActual = document.getElementById('select-tema').value;
+            
+            if (!cursoActual || !temaActual) return alert("Selecciona curso y tema");
+            
+            mostrarPantalla('pantalla-recomendacion');
+            document.getElementById('badge-estilo').textContent = `Estilo: ${estiloVARK}`;
+            document.getElementById('contenido-ia').innerHTML = `
+                <div class="text-center text-gray-500 py-12">
+                    <div class="animate-spin text-4xl mb-4">⚙️</div>
+                    <p>La IA está generando tu contenido personalizado...</p>
+                </div>`;
+            document.getElementById('seccion-calificar').classList.add('hidden');
+            
+            const prompts = {
+                V: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje VISUAL. Usa emojis visuales 📊🎨, describe diagramas con texto, usa viñetas, estructuras espaciadas, listas y analogías visuales. NO des bloques de texto densos. Incluye una descripción de un diagrama o mapa conceptual que el estudiante podría dibujar.`,
+                A: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje AUDITIVO. Escribe como si fuera el guion de un podcast o conversación. Usa tono cercano, preguntas retóricas, analogías sonoras 🎧🎤, y sugiere al estudiante que repita en voz alta los conceptos clave.`,
+                L: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado 📖️, definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
+                K: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje KINESTÉSICO. Enfócate en la práctica 🛠️. Dame un ejercicio paso a paso, un caso de uso real, una analogía de "aprender haciendo", y un mini-reto práctico que el estudiante pueda realizar inmediatamente.`
+            };
+            
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompts[estiloVARK] }] }]
+                    })
+                });
+                const data = await resp.json();
+                contenidoGenerado = data.candidates[0].content.parts[0].text;
+                
+                // Formatear texto (saltos de línea y negritas básicas)
+                const formateado = contenidoGenerado
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+                
+                document.getElementById('contenido-ia').innerHTML = `
+                    <div class="text-gray-800 leading-relaxed">${formateado}</div>`;
+                document.getElementById('seccion-calificar').classList.remove('hidden');
+                
+            } catch (e) {
+                document.getElementById('contenido-ia').innerHTML = `
+                    <div class="text-red-600">Error al generar: ${e.message}</div>`;
+            }
+        }
+
+        // =====================================================
+        // CALIFICACIÓN Y GUARDADO
+        // =====================================================
+        let calificacionActual = 0;
+
+        function calificar(n) {
+            calificacionActual = n;
+            const estrellas = document.querySelectorAll('#seccion-calificar button');
+            estrellas.forEach((btn, i) => {
+                btn.textContent = i < n ? '⭐' : '☆';
+            });
+        }
+
+        async function guardarEvaluacion() {
+            if (calificacionActual === 0) return alert("Selecciona una calificación");
+            
+            await db.collection('evaluaciones').add({
+                usuarioId: usuarioActual.uid,
+                usuarioNombre: usuarioActual.nombre,
+                estiloVARK: estiloVARK,
+                curso: cursoActual,
+                tema: temaActual,
+                calificacion: calificacionActual,
+                comentario: document.getElementById('comentario').value,
+                fecha: new Date().toISOString()
+            });
+            
+            alert("✅ Evaluación guardada. ¡Gracias por tu feedback!");
+            volverSeleccion();
+        }
+
+        // =====================================================
+        // UTILIDADES
+        // =====================================================
+        function mostrarPantalla(id) {
+            ['pantalla-auth','pantalla-vark','pantalla-resultado','pantalla-seleccion','pantalla-recomendacion']
+                .forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function irASeleccion() { mostrarPantalla('pantalla-seleccion'); }
+        function volverSeleccion() { 
+            calificacionActual = 0;
+            document.getElementById('comentario').value = '';
+            mostrarPantalla('pantalla-seleccion'); 
+        }
+
+        // Detectar sesión activa al cargar
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const doc = await db.collection('usuarios').doc(user.uid).get();
+                usuarioActual = { uid: user.uid, ...doc.data() };
+                const varkDoc = await db.collection('resultados_vark').doc(user.uid).get();
+                if (varkDoc.exists) {
+                    estiloVARK = varkDoc.data().estilo;
+                    mostrarPantalla('pantalla-seleccion');
+                } else {
+                    iniciarCuestionarioVARK();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
