@@ -537,53 +537,107 @@ function mostrarError(msg) {
         // GENERACIÓN CON GEMINI
         // =====================================================
         async function generarRecomendacion() {
-            cursoActual = document.getElementById('select-curso').value;
-            temaActual = document.getElementById('select-tema').value;
-            
-            if (!cursoActual || !temaActual) return alert("Selecciona curso y tema");
-            
-            mostrarPantalla('pantalla-recomendacion');
-            document.getElementById('badge-estilo').textContent = `Estilo: ${estiloVARK}`;
-            document.getElementById('contenido-ia').innerHTML = `
-                <div class="text-center text-gray-500 py-12">
-                    <div class="animate-spin text-4xl mb-4">⚙️</div>
-                    <p>La IA está generando tu contenido personalizado...</p>
-                </div>`;
-            document.getElementById('seccion-calificar').classList.add('hidden');
-            
-            const prompts = {
-                V: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje VISUAL. Usa emojis visuales 📊🎨, describe diagramas con texto, usa viñetas, estructuras espaciadas, listas y analogías visuales. NO des bloques de texto densos. Incluye una descripción de un diagrama o mapa conceptual que el estudiante podría dibujar.`,
-                A: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje AUDITIVO. Escribe como si fuera el guion de un podcast o conversación. Usa tono cercano, preguntas retóricas, analogías sonoras 🎧🎤, y sugiere al estudiante que repita en voz alta los conceptos clave.`,
-                L: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado 📖️, definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
-                K: `Eres un tutor educativo. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje KINESTÉSICO. Enfócate en la práctica 🛠️. Dame un ejercicio paso a paso, un caso de uso real, una analogía de "aprender haciendo", y un mini-reto práctico que el estudiante pueda realizar inmediatamente.`
-            };
-            
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                const resp = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompts[estiloVARK] }] }]
-                    })
-                });
-                const data = await resp.json();
-                contenidoGenerado = data.candidates[0].content.parts[0].text;
-                
-                // Formatear texto (saltos de línea y negritas básicas)
-                const formateado = contenidoGenerado
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br>');
-                
-                document.getElementById('contenido-ia').innerHTML = `
-                    <div class="text-gray-800 leading-relaxed">${formateado}</div>`;
-                document.getElementById('seccion-calificar').classList.remove('hidden');
-                
-            } catch (e) {
-                document.getElementById('contenido-ia').innerHTML = `
-                    <div class="text-red-600">Error al generar: ${e.message}</div>`;
+    cursoActual = document.getElementById('select-curso').value;
+    temaActual = document.getElementById('select-tema').value;
+    
+    if (!cursoActual || !temaActual) return alert("Selecciona curso y tema");
+    
+    mostrarPantalla('pantalla-recomendacion');
+    document.getElementById('badge-estilo').textContent = `Estilo: ${estiloVARK}`;
+    document.getElementById('contenido-ia').innerHTML = `
+        <div class="text-center text-gray-500 py-12">
+            <div class="animate-spin text-4xl mb-4">️</div>
+            <p>La IA está generando tu contenido personalizado...</p>
+        </div>`;
+    document.getElementById('seccion-calificar').classList.add('hidden');
+    
+    const prompts = {
+        V: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje VISUAL. Usa emojis visuales , describe diagramas con texto, usa viñetas, estructuras espaciadas, listas y analogías visuales. NO des bloques de texto densos. Incluye una descripción de un diagrama o mapa conceptual que el estudiante podría dibujar.`,
+        A: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje AUDITIVO. Escribe como si fuera el guion de un podcast o conversación. Usa tono cercano, preguntas retóricas, analogías sonoras 🎧🎤, y sugiere al estudiante que repita en voz alta los conceptos clave.`,
+        R: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado 📖, definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
+        K: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje KINESTÉSICO. Enfócate en la práctica 🛠️. Dame un ejercicio paso a paso, un caso de uso real, una analogía de "aprender haciendo", y un mini-reto práctico que el estudiante pueda realizar inmediatamente.`
+    };
+    
+    try {
+        console.log('🔑 API Key configurada:', GEMINI_API_KEY ? 'Sí' : 'No');
+        console.log('📝 Estilo VARK:', estiloVARK);
+        console.log('📚 Curso:', cursoActual);
+        console.log(' Tema:', temaActual);
+        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        
+        const payload = {
+            contents: [{ 
+                parts: [{ 
+                    text: prompts[estiloVARK] 
+                }] 
+            }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1024
             }
+        };
+        
+        console.log('📡 Enviando solicitud a Gemini...');
+        
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        console.log('📥 Respuesta recibida. Status:', resp.status);
+        
+        if (!resp.ok) {
+            const errorText = await resp.text();
+            console.error('❌ Error HTTP:', errorText);
+            throw new Error(`Error ${resp.status}: ${errorText}`);
         }
+        
+        const data = await resp.json();
+        console.log('✅ Datos recibidos:', data);
+        
+        // Verificar que la respuesta tenga la estructura correcta
+        if (!data.candidates || data.candidates.length === 0) {
+            console.error(' No hay candidates en la respuesta:', data);
+            throw new Error("La respuesta de Gemini no contiene contenido generado");
+        }
+        
+        if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+            console.error('❌ No hay parts en el contenido:', data.candidates[0]);
+            throw new Error("La respuesta de Gemini no tiene formato válido");
+        }
+        
+        contenidoGenerado = data.candidates[0].content.parts[0].text;
+        console.log('✨ Contenido generado:', contenidoGenerado.substring(0, 100) + '...');
+        
+        // Formatear el texto
+        const formateado = contenidoGenerado
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        
+        document.getElementById('contenido-ia').innerHTML = `
+            <div class="text-gray-800 leading-relaxed">${formateado}</div>`;
+        document.getElementById('seccion-calificar').classList.remove('hidden');
+        
+    } catch (e) {
+        console.error('💥 Error completo:', e);
+        document.getElementById('contenido-ia').innerHTML = `
+            <div class="text-red-600 p-4 bg-red-50 rounded-lg">
+                <h3 class="font-bold mb-2">❌ Error al generar contenido:</h3>
+                <p class="mb-2"><strong>Mensaje:</strong> ${e.message}</p>
+                <p class="text-sm"><strong>Causas posibles:</strong></p>
+                <ul class="text-sm list-disc list-inside mt-1">
+                    <li>API Key de Gemini no configurada o inválida</li>
+                    <li>Problema de conexión a internet</li>
+                    <li>La API de Gemini no está disponible</li>
+                </ul>
+                <p class="mt-2 text-xs">Revisa la consola del navegador (F12) para más detalles.</p>
+            </div>`;
+    }
+}
 
         // =====================================================
         // CALIFICACIÓN Y GUARDADO
