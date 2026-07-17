@@ -164,7 +164,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
+    
     <script>
         // =====================================================
         // 🔑 CONFIGURACIÓN - REEMPLAZA ESTOS VALORES
@@ -212,7 +212,6 @@
                 "Ecuaciones de búsqueda de información", 
                 "Evaluación de la confiabilidad de las fuentes de información", 
                 "Análisis de información con herramientas de IA (Litmaps, Consensus, Scite)", 
-                "Procesamiento de grandes volúmenes de información con IA para investigaciones educativas", 
                 "Herramientas de inteligencia artificial para la creación de resúmenes y síntesis de textos largos", 
                 "Gestores bibliográficos: funciones y beneficios (Zotero, Mendeley, EndNote)", 
                 "Uso de Zotero para organizar y gestionar bibliografía", 
@@ -600,21 +599,35 @@ function mostrarError(msg) {
         }
 
         async function guardarEvaluacion() {
-            if (calificacionActual === 0) return alert("Selecciona una calificación");
+            if (calificacionActual === 0) return alert("Selecciona una calificación de 1 a 5 estrellas");
             
-            await db.collection('evaluaciones').add({
+            const evaluacionData = {
                 usuarioId: usuarioActual.uid,
                 usuarioNombre: usuarioActual.nombre,
+                usuarioEmail: usuarioActual.email,
                 estiloVARK: estiloVARK,
                 curso: cursoActual,
                 tema: temaActual,
                 calificacion: calificacionActual,
-                comentario: document.getElementById('comentario').value,
+                comentario: document.getElementById('comentario').value || "Sin comentarios",
                 fecha: new Date().toISOString()
-            });
-            
-            alert("✅ Evaluación guardada. ¡Gracias por tu feedback!");
-            volverSeleccion();
+            };
+        
+            try {
+                // Guardar en Firestore
+                await db.collection('evaluaciones').add(evaluacionData);
+                
+                // Respaldo local
+                const evaluaciones = JSON.parse(localStorage.getItem('evaluaciones') || '[]');
+                evaluaciones.push(evaluacionData);
+                localStorage.setItem('evaluaciones', JSON.stringify(evaluaciones));
+                
+                alert("✅ Evaluación guardada exitosamente en la base de datos. ¡Gracias por tu feedback!");
+                volverSeleccion();
+            } catch (error) {
+                console.error("Error al guardar en Firestore:", error);
+                alert("⚠️ Se guardó localmente, pero hubo un error de conexión con la base de datos.");
+            }
         }
 
         // =====================================================
