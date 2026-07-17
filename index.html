@@ -554,17 +554,16 @@ async function generarRecomendacion() {
     const prompts = {
         V: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje VISUAL. Usa emojis visuales 📊, describe diagramas con texto, usa viñetas, estructuras espaciadas, listas y analogías visuales. NO des bloques de texto densos. Incluye una descripción de un diagrama o mapa conceptual que el estudiante podría dibujar.`,
         A: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje AUDITIVO. Escribe como si fuera el guion de un podcast o conversación. Usa tono cercano, preguntas retóricas, analogías sonoras 🎧, y sugiere al estudiante que repita en voz alta los conceptos clave.`,
-        R: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado , definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
-        K: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje KINESTÉSICO. Enfócate en la práctica 🛠️. Dame un ejercicio paso a paso, un caso de uso real, una analogía de "aprender haciendo", y un mini-reto práctico que el estudiante pueda realizar inmediatamente.`
+        R: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado 📖, definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
+        K: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje KINESTÉSICO. Enfócate en la práctica ️. Dame un ejercicio paso a paso, un caso de uso real, una analogía de "aprender haciendo", y un mini-reto práctico que el estudiante pueda realizar inmediatamente.`
     };
     
     try {
-        // Verificar que la API Key esté configurada
         if (!GEMINI_API_KEY || GEMINI_API_KEY === "PEGA_AQUI_TU_API_KEY_DE_GEMINI") {
-            throw new Error("API Key de Gemini no configurada. Por favor, configura tu API Key en el código.");
+            throw new Error("API Key de Gemini no configurada correctamente");
         }
         
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
         
         const payload = {
             contents: [{ 
@@ -574,42 +573,44 @@ async function generarRecomendacion() {
             }]
         };
         
-        // Hacer la solicitud con la API Key en el header y en el query string
-        const resp = await fetch(`${url}?key=${GEMINI_API_KEY}`, {
+        console.log('🔑 API Key:', GEMINI_API_KEY ? 'Configurada' : 'NO configurada');
+        console.log('📡 URL:', url);
+        console.log('📝 Prompt:', prompts[estiloVARK].substring(0, 100) + '...');
+        
+        const resp = await fetch(url, {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json',
-                'x-goog-api-key': GEMINI_API_KEY  // Agregar también en el header
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
         });
         
+        console.log('📥 Status:', resp.status);
+        
         if (!resp.ok) {
             const errorData = await resp.json().catch(() => ({}));
-            console.error('Error response:', errorData);
+            console.error('❌ Error response:', errorData);
             
-            if (resp.status === 401) {
-                throw new Error("Credenciales inválidas. Verifica que tu API Key de Gemini sea correcta y esté activa.");
+            if (resp.status === 404) {
+                throw new Error("Endpoint no encontrado. Verifica que la API Key sea válida y la API esté habilitada.");
+            } else if (resp.status === 401) {
+                throw new Error("Credenciales inválidas. Verifica tu API Key de Gemini.");
             } else if (resp.status === 403) {
-                throw new Error("API Key sin permisos. Verifica que la API de Gemini esté habilitada en Google Cloud Console.");
+                throw new Error("API sin permisos. Habilita la API de Gemini en Google Cloud Console.");
             } else {
                 throw new Error(`Error ${resp.status}: ${resp.statusText}`);
             }
         }
         
         const data = await resp.json();
+        console.log('✅ Respuesta:', data);
         
         if (!data.candidates || data.candidates.length === 0) {
-            throw new Error("La API de Gemini no generó contenido. Intenta de nuevo.");
-        }
-        
-        if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-            throw new Error("Respuesta inválida de la API de Gemini.");
+            throw new Error("La API no generó contenido");
         }
         
         contenidoGenerado = data.candidates[0].content.parts[0].text;
         
-        // Formatear el texto
         const formateado = contenidoGenerado
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\n/g, '<br>');
@@ -619,18 +620,18 @@ async function generarRecomendacion() {
         document.getElementById('seccion-calificar').classList.remove('hidden');
         
     } catch (e) {
-        console.error('Error completo:', e);
+        console.error('💥 Error completo:', e);
         document.getElementById('contenido-ia').innerHTML = `
             <div class="text-red-600 p-4 bg-red-50 rounded-lg">
-                <h3 class="font-bold mb-2"> Error al generar contenido:</h3>
+                <h3 class="font-bold mb-2">❌ Error al generar contenido:</h3>
                 <p class="mb-2"><strong>Mensaje:</strong> ${e.message}</p>
                 <p class="text-sm"><strong>Causas posibles:</strong></p>
                 <ul class="text-sm list-disc list-inside mt-1">
-                    <li>API Key de Gemini inválida o expirada</li>
-                    <li>La API de Gemini no está habilitada en tu proyecto</li>
-                    <li>Problema de conexión a internet</li>
+                    <li>API Key inválida o no configurada</li>
+                    <li>La API de Gemini no está habilitada</li>
+                    <li>Problema de conexión</li>
                 </ul>
-                <p class="mt-2 text-xs">Revisa la consola del navegador (F12) para más detalles.</p>
+                <p class="mt-2 text-xs">Revisa la consola (F12) para más detalles.</p>
             </div>`;
     }
 }
