@@ -172,12 +172,12 @@
         
         // 1. Pega aquí tu firebaseConfig (el que copiaste de Firebase)
         const firebaseConfig = {
-          apiKey: "AIzaSyAhFzQnqEuhMVZLJIsBSNjJ-pNoeOHimGs",
-          authDomain: "modeloiag.firebaseapp.com",
-          projectId: "modeloiag",
-          storageBucket: "modeloiag.firebasestorage.app",
-          messagingSenderId: "695808252428",
-          appId: "1:695808252428:web:d1e4d6386640a6f197ac29"
+            apiKey: "AIzaSyAhFzQnqEuhMVZLJIsBSNjJ-pNoeOHimGs",
+            authDomain: "modeloiag.firebaseapp.com",
+            projectId: "modeloiag",
+            storageBucket: "modeloiag.firebasestorage.app",
+            messagingSenderId: "695808252428",
+            appId: "1:695808252428:web:d1e4d6386640a6f197ac29"
         };
 
         // 2. Pega aquí tu API Key de Google Gemini (de Google AI Studio)
@@ -536,7 +536,7 @@ function mostrarError(msg) {
         // =====================================================
         // GENERACIÓN CON GEMINI
         // =====================================================
-        async function generarRecomendacion() {
+async function generarRecomendacion() {
     cursoActual = document.getElementById('select-curso').value;
     temaActual = document.getElementById('select-tema').value;
     
@@ -546,72 +546,68 @@ function mostrarError(msg) {
     document.getElementById('badge-estilo').textContent = `Estilo: ${estiloVARK}`;
     document.getElementById('contenido-ia').innerHTML = `
         <div class="text-center text-gray-500 py-12">
-            <div class="animate-spin text-4xl mb-4">️</div>
+            <div class="animate-spin text-4xl mb-4">⚙️</div>
             <p>La IA está generando tu contenido personalizado...</p>
         </div>`;
     document.getElementById('seccion-calificar').classList.add('hidden');
     
     const prompts = {
-        V: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje VISUAL. Usa emojis visuales , describe diagramas con texto, usa viñetas, estructuras espaciadas, listas y analogías visuales. NO des bloques de texto densos. Incluye una descripción de un diagrama o mapa conceptual que el estudiante podría dibujar.`,
-        A: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje AUDITIVO. Escribe como si fuera el guion de un podcast o conversación. Usa tono cercano, preguntas retóricas, analogías sonoras 🎧🎤, y sugiere al estudiante que repita en voz alta los conceptos clave.`,
-        R: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado 📖, definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
+        V: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje VISUAL. Usa emojis visuales 📊, describe diagramas con texto, usa viñetas, estructuras espaciadas, listas y analogías visuales. NO des bloques de texto densos. Incluye una descripción de un diagrama o mapa conceptual que el estudiante podría dibujar.`,
+        A: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje AUDITIVO. Escribe como si fuera el guion de un podcast o conversación. Usa tono cercano, preguntas retóricas, analogías sonoras 🎧, y sugiere al estudiante que repita en voz alta los conceptos clave.`,
+        R: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje LECTURA/ESCRITURA. Proporciona un resumen estructurado , definiciones formales, listas numeradas, texto detallado pero claro, y al final incluye 3 preguntas de reflexión para que el estudiante responda por escrito.`,
         K: `Eres un tutor educativo experto. Explica el tema "${temaActual}" del curso "${cursoActual}" para un estudiante con estilo de aprendizaje KINESTÉSICO. Enfócate en la práctica 🛠️. Dame un ejercicio paso a paso, un caso de uso real, una analogía de "aprender haciendo", y un mini-reto práctico que el estudiante pueda realizar inmediatamente.`
     };
     
     try {
-        console.log('🔑 API Key configurada:', GEMINI_API_KEY ? 'Sí' : 'No');
-        console.log('📝 Estilo VARK:', estiloVARK);
-        console.log('📚 Curso:', cursoActual);
-        console.log(' Tema:', temaActual);
+        // Verificar que la API Key esté configurada
+        if (!GEMINI_API_KEY || GEMINI_API_KEY === "PEGA_AQUI_TU_API_KEY_DE_GEMINI") {
+            throw new Error("API Key de Gemini no configurada. Por favor, configura tu API Key en el código.");
+        }
         
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
         
         const payload = {
             contents: [{ 
                 parts: [{ 
                     text: prompts[estiloVARK] 
                 }] 
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1024
-            }
+            }]
         };
         
-        console.log('📡 Enviando solicitud a Gemini...');
-        
-        const resp = await fetch(url, {
+        // Hacer la solicitud con la API Key en el header y en el query string
+        const resp = await fetch(`${url}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json' 
+                'Content-Type': 'application/json',
+                'x-goog-api-key': GEMINI_API_KEY  // Agregar también en el header
             },
             body: JSON.stringify(payload)
         });
         
-        console.log('📥 Respuesta recibida. Status:', resp.status);
-        
         if (!resp.ok) {
-            const errorText = await resp.text();
-            console.error('❌ Error HTTP:', errorText);
-            throw new Error(`Error ${resp.status}: ${errorText}`);
+            const errorData = await resp.json().catch(() => ({}));
+            console.error('Error response:', errorData);
+            
+            if (resp.status === 401) {
+                throw new Error("Credenciales inválidas. Verifica que tu API Key de Gemini sea correcta y esté activa.");
+            } else if (resp.status === 403) {
+                throw new Error("API Key sin permisos. Verifica que la API de Gemini esté habilitada en Google Cloud Console.");
+            } else {
+                throw new Error(`Error ${resp.status}: ${resp.statusText}`);
+            }
         }
         
         const data = await resp.json();
-        console.log('✅ Datos recibidos:', data);
         
-        // Verificar que la respuesta tenga la estructura correcta
         if (!data.candidates || data.candidates.length === 0) {
-            console.error(' No hay candidates en la respuesta:', data);
-            throw new Error("La respuesta de Gemini no contiene contenido generado");
+            throw new Error("La API de Gemini no generó contenido. Intenta de nuevo.");
         }
         
         if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-            console.error('❌ No hay parts en el contenido:', data.candidates[0]);
-            throw new Error("La respuesta de Gemini no tiene formato válido");
+            throw new Error("Respuesta inválida de la API de Gemini.");
         }
         
         contenidoGenerado = data.candidates[0].content.parts[0].text;
-        console.log('✨ Contenido generado:', contenidoGenerado.substring(0, 100) + '...');
         
         // Formatear el texto
         const formateado = contenidoGenerado
@@ -623,16 +619,16 @@ function mostrarError(msg) {
         document.getElementById('seccion-calificar').classList.remove('hidden');
         
     } catch (e) {
-        console.error('💥 Error completo:', e);
+        console.error('Error completo:', e);
         document.getElementById('contenido-ia').innerHTML = `
             <div class="text-red-600 p-4 bg-red-50 rounded-lg">
-                <h3 class="font-bold mb-2">❌ Error al generar contenido:</h3>
+                <h3 class="font-bold mb-2"> Error al generar contenido:</h3>
                 <p class="mb-2"><strong>Mensaje:</strong> ${e.message}</p>
                 <p class="text-sm"><strong>Causas posibles:</strong></p>
                 <ul class="text-sm list-disc list-inside mt-1">
-                    <li>API Key de Gemini no configurada o inválida</li>
+                    <li>API Key de Gemini inválida o expirada</li>
+                    <li>La API de Gemini no está habilitada en tu proyecto</li>
                     <li>Problema de conexión a internet</li>
-                    <li>La API de Gemini no está disponible</li>
                 </ul>
                 <p class="mt-2 text-xs">Revisa la consola del navegador (F12) para más detalles.</p>
             </div>`;
