@@ -105,6 +105,7 @@
                 <option value="bd">Base de Datos</option>
                 <option value="redes">Redes de Computadoras</option>
                 <option value="ia">Inteligencia Artificial</option>
+                <option value="cultura">Cultura Informacional en Educación</option>
             </select>
             
             <label class="block text-gray-700 font-semibold mb-2">Tema:</label>
@@ -202,7 +203,22 @@
             programacion: ["Variables y tipos de datos", "Estructuras condicionales", "Ciclos y bucles", "Funciones", "Arreglos"],
             bd: ["Modelo Entidad-Relación", "Normalización", "SQL básico", "Índices", "Transacciones"],
             redes: ["Modelo OSI", "Protocolo TCP/IP", "Direccionamiento IP", "DNS y DHCP", "Seguridad de redes"],
-            ia: ["Búsqueda heurística", "Redes neuronales", "Aprendizaje supervisado", "Procesamiento de lenguaje natural", "Visión por computadora"]
+            ia: ["Búsqueda heurística", "Redes neuronales", "Aprendizaje supervisado", "Procesamiento de lenguaje natural", "Visión por computadora"],
+            cultura: [
+                "Fuentes de información académica: repositorios",
+                "Fuentes de información académica: bases de datos",
+                "Fuentes de información académica: bibliotecas digitales",
+                "Búsqueda de información con herramientas de IA (Elicit, Research Rabbit)", 
+                "Ecuaciones de búsqueda de información", 
+                "Evaluación de la confiabilidad de las fuentes de información", 
+                "Análisis de información con herramientas de IA (Litmaps, Consensus, Scite)", 
+                "Procesamiento de grandes volúmenes de información con IA para investigaciones educativas", 
+                "Herramientas de inteligencia artificial para la creación de resúmenes y síntesis de textos largos", 
+                "Gestores bibliográficos: funciones y beneficios (Zotero, Mendeley, EndNote)", 
+                "Uso de Zotero para organizar y gestionar bibliografía", 
+                "Citación en  Zotero", 
+                "Colaboración  en zotero"
+            ]
         };
 
         const preguntasVARK = [
@@ -211,7 +227,7 @@
         opciones: {
             K: "Buscaría dónde está la tienda en relación con algún lugar que conozco.",
             A: "Le diría a mi amigo que me diera las indicaciones.",
-            R: "Escribiría el nombre de la calle que debo recordar.",
+            L: "Escribiría el nombre de la calle que debo recordar.",
             V: "Usaría un mapa."
         }
     },
@@ -220,7 +236,7 @@
         opciones: {
             V: "Viendo los diagramas.",
             A: "Escuchando.",
-            R: "Leyendo las palabras.",
+            L: "Leyendo las palabras.",
             K: "Viendo las acciones."
         }
     },
@@ -229,7 +245,7 @@
         opciones: {
             K: "Miraría los detalles sobre los aspectos más destacados y las actividades de la excursión.",
             V: "Usaría un mapa y vería dónde están los lugares.",
-            R: "Leería sobre la excursión en el itinerario.",
+            L: "Leería sobre la excursión en el itinerario.",
             A: "Habría con la persona que planificó la excursión o con otras personas que vayan a hacerla."
         }
     },
@@ -239,7 +255,7 @@
             K: "Aplicar mis conocimientos en situaciones reales.",
             A: "Comunicarme con otros a través del diálogo.",
             V: "Trabajar con diseños, mapas o gráficos.",
-            R: "Utilizar bien las palabras en las comunicaciones escritas."
+            L: "Utilizar bien las palabras en las comunicaciones escritas."
         }
     },
     {
@@ -248,14 +264,14 @@
             A: "Me gusta hablar de las cosas.",
             V: "Veo patrones en las cosas.",
             K: "Uso ejemplos y aplicaciones.",
-            R: "Leo libros, artículos y folletos."
+            L: "Leo libros, artículos y folletos."
         }
     },
     {
         p: "Quiero ahorrar más dinero y decidir entre una serie de opciones. Yo:",
         opciones: {
             K: "Consideraría ejemplos de cada opción utilizando mi información financiera.",
-            R: "Leería un folleto impreso que describa las opciones en detalle.",
+            L: "Leería un folleto impreso que describa las opciones en detalle.",
             V: "Utilizaría gráficos que muestren diferentes opciones para diferentes periodos de tiempo.",
             A: "Habría con un experto sobre las opciones."
         }
@@ -266,13 +282,13 @@
             K: "Observaría a otros jugar antes de unirme al juego.",
             A: "Escucharía a alguien que lo explicara y haría preguntas.",
             V: "Utilizaría los diagramas que explican las distintas fases, movimientos y estrategias del juego.",
-            R: "Leería las instrucciones."
+            L: "Leería las instrucciones."
         }
     },
     {
         p: "Tengo un problema en el corazón. Preferiría que el médico:",
         opciones: {
-            R: "Le diera algo que leer para explicar lo que está mal.",
+            L: "Le diera algo que leer para explicar lo que está mal.",
             K: "Utilizara un modelo de plástico para mostrar lo que está mal.",
             A: "Describiera lo que está mal.",
             V: "Le mostrara un diagrama de lo que está mal."
@@ -281,7 +297,7 @@
     {
         p: "Quiero aprender a hacer algo nuevo en una computadora. Yo:",
         opciones: {
-            R: "Leería las instrucciones escritas que vienen con el programa.",
+            L: "Leería las instrucciones escritas que vienen con el programa.",
             A: "Habría con personas que conozcan el programa.",
             K: "Empezaría a utilizarlo y aprender por ensayo y error.",
             V: "Seguiría los diagramas de un libro."
@@ -292,7 +308,7 @@
         opciones: {
             K: "Los vídeos que muestran cómo hacer o fabricar algo.",
             V: "El diseño y las características visuales interesantes.",
-            R: "Descripciones, listas y explicaciones escritas interesantes.",
+            L: "Descripciones, listas y explicaciones escritas interesantes.",
             A: "Los canales de audio donde puedo escuchar podcasts o entrevistas."
         }
     },
@@ -300,7 +316,7 @@
         p: "Quiero aprender sobre un nuevo proyecto. Me gustaría pedir:",
         opciones: {
             V: "Diagramas que muestren las etapas del proyecto con gráficos de beneficios y costes.",
-            R: "Un informe escrito que describa las principales características del proyecto.",
+            L: "Un informe escrito que describa las principales características del proyecto.",
             A: "Una oportunidad para hablar sobre el proyecto.",
             K: "Ejemplos en los que el proyecto se haya utilizado con éxito."
         }
@@ -309,7 +325,7 @@
         p: "Quiero aprender a tomar mejores fotos. Yo:",
         opciones: {
             A: "Haría preguntas y hablaría sobre la cámara y sus características.",
-            R: "Utilizaría las instrucciones escritas sobre lo que hay que hacer.",
+            L: "Utilizaría las instrucciones escritas sobre lo que hay que hacer.",
             V: "Utilizaría diagramas que muestren la cámara y lo que hace cada parte.",
             K: "Utilizaría ejemplos de fotos buenas y malas mostrando cómo mejorarlas."
         }
@@ -319,7 +335,7 @@
         opciones: {
             K: "Demostraciones, modelos o sesiones prácticas.",
             A: "Preguntas y respuestas, charlas, discusiones en grupo u oradores invitados.",
-            R: "Folletos, libros o lecturas.",
+            L: "Folletos, libros o lecturas.",
             V: "Diagramas, cuadros, mapas o gráficos."
         }
     },
@@ -327,7 +343,7 @@
         p: "Acabo de terminar una competencia o una prueba y me gustaría recibir una opinión. Me gustaría recibirla:",
         opciones: {
             K: "Utilizando ejemplos de lo que he hecho.",
-            R: "Mediante una descripción escrita de mis resultados.",
+            L: "Mediante una descripción escrita de mis resultados.",
             A: "De alguien que lo hable conmigo.",
             V: "Mediante gráficos que muestren lo que alcancé."
         }
@@ -337,7 +353,7 @@
         opciones: {
             K: "Ver un vídeo de la propiedad.",
             A: "Una conversación con el propietario.",
-            R: "Una descripción impresa de las habitaciones y las características.",
+            L: "Una descripción impresa de las habitaciones y las características.",
             V: "Un plano que muestre las habitaciones y un mapa de la zona."
         }
     },
@@ -346,7 +362,7 @@
         opciones: {
             V: "Diagramas que muestren cada etapa del montaje.",
             A: "Los consejos de alguien que lo haya hecho antes.",
-            R: "Las instrucciones escritas que vienen con las piezas de la mesa.",
+            L: "Las instrucciones escritas que vienen con las piezas de la mesa.",
             K: "Un vídeo de una persona montando una mesa similar."
         }
     }  
